@@ -52,4 +52,52 @@ contract('MetaCoin', function(accounts) {
       assert.equal(account_two_ending_balance, account_two_starting_balance + amount, "Amount wasn't correctly sent to the receiver");
     });
   });
+
+  it("should initialize to 0 refills allowed", function() {
+    var meta = MetaCoin.deployed();
+
+    return meta.getRefillsAllowed.call().then(function(refills_allowed) {
+      assert.equal(refills_allowed.valueOf(), 0, "Refills allowed not initialized to 0");
+    });
+  });
+
+
+  it("should be able to set refills allowed to 3", function() {
+    var meta = MetaCoin.deployed();
+    var refills = 3;
+
+    return meta.setRefillsAllowed.call(refills, {from: accounts[1]}).then(function(done) {
+      assert.equal(done, true, "Refills allowed set error");
+
+    });
+
+    return meta.getRefillsAllowed.call().then(function(refills_allowed) {
+      assert.equal(refills_allowed.valueOf(), 3, "Refills allowed not set to 3");
+    });
+
+  });
+
+
+  it("should initialize to 0 refills taken", function() {
+    var meta = MetaCoin.deployed();
+
+    return meta.getRefillsTaken.call().then(function(refills_taken) {
+      assert.equal(refills_taken.valueOf(), 0, "Refills taken not initialized to 0");
+    });
+  });
+
+
+  it("should be able to increment refills taken by 1", function() {
+    var meta = MetaCoin.deployed();
+
+    return meta.incRefillsTaken.call().then(function(done) {
+      assert.equal(done, true, "Refills taken increment error");
+    });
+    return meta.getRefillsTaken.call().then(function(refills_taken) {
+      assert.equal(refills_taken.valueOf(), 1, "Refills taken not incremented by 1");
+    });
+  });
+
+
+
 });
