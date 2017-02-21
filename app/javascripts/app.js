@@ -7,7 +7,7 @@ function setStatus(message) {
 };
 
 function refreshBalance() {
-  var meta = MetaCoin.deployed();
+  var meta = ARX_Pharmacy.deployed();
 
   meta.getBalance.call(account, {from: account}).then(function(value) {
     var balance_element = document.getElementById("balance");
@@ -19,7 +19,7 @@ function refreshBalance() {
 };
 
 function sendCoin() {
-  var meta = MetaCoin.deployed();
+  var meta = ARX_Pharmacy.deployed();
 
   var amount = parseInt(document.getElementById("amount").value);
   var receiver = document.getElementById("receiver").value;
