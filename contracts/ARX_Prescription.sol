@@ -6,8 +6,6 @@ import "ConvertLib.sol";
 /* TODO:
 
 Doctor - deploy a prescription
-Doctor - send to the patient
-
 
 Store patient data off chain (for privacy)
 Restrict access to prescriptions:
@@ -21,6 +19,9 @@ http://getskeleton.com/
 
 Doxygen - standard documentation.
 Deploy on GETH local net
+
+from coury:   can share account
+frontendmasters.com
 
 */
 
@@ -75,88 +76,63 @@ Developer Mode
 	Can request transactions from any account
 */
 
+contract Test {
 
+	uint num;
+	function Test(){
+		num = 1;
+	}
+}
 
 contract ARX_Prescription {
 
 	// Stakeholders
     address creator;
     address owner;
-
 	address doctor;
 	address patient; 
 	address pharmacy;
 
-	// Medication	
+	// Medication info
 	uint medication_id;   // ID in a shared registry of medications
 	uint refills_allowed;
 	uint refills_taken;
 
+	// Prescription state
+	uint constant CREATED = 0;
+	uint constant SIGNED = 1;
+	uint constant SUBMITTED = 2;
+	uint constant FILLED = 3;
+	uint constant EXPIRED = 4;
+	uint constant ERROR = 4;
 
-// Contract state 
-//	enum PrescriptionState { Created, Signed, Submitted, Filled, Expired, Error }
-
-//	PrescriptionState rxstate;
-//	PrescriptionState constant default_rxstate = PrescriptionState.Created;
-
+	uint rxstate;
 
 	// Constructor function
 	function ARX_Prescription() {
 
-		medication_id = 0;
+        creator 		= msg.sender;
+        owner 			= msg.sender;
+
+		medication_id 	= 0;
 		refills_allowed = 0;
-		refills_taken = 0;
+		refills_taken 	= 0;
 
-		// State variables are accessed via their name
-        // and not via e.g. this.owner. This also applies
-        // to functions and especially in the constructors,
-        // you can only call them like that ("internall"),
-        // because the contract itself does not exist yet.
-        owner = msg.sender;
-        // We do an explicit type conversion from `address`
-        // to `TokenCreator` and assume that the type of
-        // the calling contract is TokenCreator, there is
-        // no real way to check that.
-        //creator = ARX_Doctor(msg.sender);
+		rxstate 		= CREATED;
 	}
 
-    function transferOwner(address newOwner) returns (bool) {
-        // Only the current owner can transfer the token.
-        if (msg.sender != owner) {
-        	return false;
-        }
-        // We also want to ask the creator if the transfer
-        // is fine. Note that this calls a function of the
-        // contract defined below. If the call fails (e.g.
-        // due to out-of-gas), the execution here stops
-        // immediately.
-        //if (creator.isTokenTransferOK(owner, newOwner))
-        //    owner = newOwner;
 
-        else {
-        	owner = newOwner;
-        	return true;
-        }
-    }
+// Prescription state functions
 
-	function getCreator() returns(address) {
-		return creator;
-	}
-	function getOwner() returns(address) {
-		return owner;
-	}
-
-// Contract state functions
-/*
-	function setPrescriptionState(PrescriptionState state) returns(bool) {
+	function setPrescriptionState(uint state) returns(bool) {
 		rxstate = state;
         return true;
 	}
 	
-	function getPrescriptionState() returns(PrescriptionState) {
+	function getPrescriptionState() returns(uint) {
 		return rxstate;
 	}
-*/
+
 // Medication functions
 
 	function setMedicationID(uint num) returns(bool) {
@@ -189,34 +165,51 @@ contract ARX_Prescription {
 
 // Stakeholder functions
 
-
-	function setPatientAddress(address addr) returns(bool) {
+	function setPatient(address addr) returns(bool) {
 		patient = addr;
         return true;
 	}
 	
-	function getPatientAddress() returns(address) {
+	function getPatient() returns(address) {
 		return patient;
 	}
 
-	function setDoctorAddress(address addr) returns(bool) {
+	function setDoctor(address addr) returns(bool) {
 		doctor = addr;
         return true;
 	}
 	
-	function getDoctorAddress() returns(address) {
+	function getDoctor() returns(address) {
 		return doctor;
 	}
 
-	function setPharmacyAddress(address addr) returns(bool) {
+	function setPharmacy(address addr) returns(bool) {
 		pharmacy = addr;
         return true;
 	}
 	
-	function getPharmacyAddress() returns(address) {
+	function getPharmacy() returns(address) {
 		return pharmacy;
 	}
+
+	function getCreator() returns(address) {
+		return creator;
+	}
 	
+    function transferOwner(address newOwner) returns (bool) {
+        // Only the current owner can transfer the token.
+        if (msg.sender != owner) {
+        	return false;
+        }
+        else {
+        	owner = newOwner;
+        	return true;
+        }
+    }
+
+	function getOwner() returns(address) {
+		return owner;
+	}
 }
 
 
