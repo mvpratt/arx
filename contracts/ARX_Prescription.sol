@@ -121,6 +121,10 @@ contract ARX_Prescription {
 		rxstate 		= CREATED;
 	}
 
+	function testDeploy(){
+		new Test();
+	}
+
 
 // Prescription state functions
 
