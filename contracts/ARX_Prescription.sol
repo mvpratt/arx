@@ -15,7 +15,6 @@ contract ARX_Prescription {
 
 	// Stakeholders
     address creator;
-    address owner;
 	address doctor;
 	address patient; 
 	address pharmacy;
@@ -25,12 +24,13 @@ contract ARX_Prescription {
 	uint refills_taken;
 
 	// Prescription state
-	uint constant CREATED = 0;   // doctor
-	uint constant SIGNED = 1;    // doctor
-	uint constant SUBMITTED = 2; // patient
-	uint constant FILLED = 3;    // pharmacy
-	uint constant EXPIRED = 4;   // pharmacy
-	uint constant ERROR = 4;     // self
+	uint constant CREATED          = 0;   
+	uint constant SIGNED           = 1;    
+	uint constant SUBMITTED        = 2; 
+	uint constant REFILL_REQUESTED = 3;
+	uint constant FILLED           = 4;    
+	uint constant EXPIRED          = 5;   
+	uint constant ERROR            = 6;     
 	uint rxstate;
 
 	uint constant MAX_REFILLS = 3;
@@ -46,8 +46,7 @@ contract ARX_Prescription {
 	function ARX_Prescription() {
 
         creator 		= msg.sender;
-        owner 			= msg.sender;
-        doctor 			= 0;
+        doctor 			= msg.sender;
         patient 		= 0;
         pharmacy 		= 0;
 		medication_id 	= 0;
@@ -62,20 +61,53 @@ contract ARX_Prescription {
 	}
 
 
-// Prescription state functions
+// Prescription state 
 
-	function setPrescriptionState(uint state) {
-		rxstate = state;
+	function signRx() {
+		if (msg.sender == doctor) {
+			rxstate = SIGNED;
+		}
 	}
-	
+
+	function submitRx() {
+		if (msg.sender == patient) {
+			rxstate = SUBMITTED;
+		}
+	}
+
+	function reqRefillRx() {
+		if (msg.sender == patient) {
+			rxstate = REFILL_REQUESTED;
+		}
+	}
+
+	function fillRx() {
+		if (msg.sender == pharmacy) {
+
+			if (refills_taken == MAX_REFILLS-1) {
+		    	refills_taken = MAX_REFILLS;
+		    	rxstate = EXPIRED;
+        		maxRefillsReached();
+        	}
+        	else if (refills_taken < MAX_REFILLS) {
+        		refills_taken = refills_taken + 1;
+        		rxstate = FILLED;
+        	}
+		}
+	}
+
 	function getPrescriptionState() returns(uint) {
 		return rxstate;
 	}
 
-// Medication functions
+
+
+// Medication 
 
 	function setMedicationID(uint num) {
-		medication_id = num;
+		if (msg.sender == doctor) {
+			medication_id = num;
+		}
 	}
 	
 	function getMedicationID() returns(uint) {
@@ -99,10 +131,12 @@ contract ARX_Prescription {
 	
 
 
-// Stakeholder functions
+// Stakeholders
 
 	function setPatient(address addr) {
-		patient = addr;
+		if (msg.sender == doctor) {
+			patient = addr;
+		}
 	}
 	
 	function getPatient() returns(address) {
@@ -110,7 +144,9 @@ contract ARX_Prescription {
 	}
 
 	function setDoctor(address addr) {
-		doctor = addr;
+		if (msg.sender == doctor) {
+			doctor = addr;
+		}
 	}
 	
 	function getDoctor() returns(address) {
@@ -118,7 +154,9 @@ contract ARX_Prescription {
 	}
 
 	function setPharmacy(address addr) {
-		pharmacy = addr;
+		if (msg.sender == patient) {
+			pharmacy = addr;
+		}
 	}
 	
 	function getPharmacy() returns(address) {
@@ -129,20 +167,6 @@ contract ARX_Prescription {
 		return creator;
 	}
 	
-    function transferOwner(address newOwner) returns (bool) {
-        // Only the current owner can transfer the token.
-        if (msg.sender != owner) {
-        	return false;
-        }
-        else {
-        	owner = newOwner;
-        	return true;
-        }
-    }
-
-	function getOwner() returns(address) {
-		return owner;
-	}
 }
 
 
