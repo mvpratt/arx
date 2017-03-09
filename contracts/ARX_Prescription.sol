@@ -21,7 +21,7 @@ contract ARX_Prescription {
 
 	// Medication info
 	uint medication_id;   // ID in a shared registry of medications
-	uint refills_taken;
+	uint refills_left;
 
 	// Prescription state
 	uint constant CREATED          = 0;   
@@ -40,6 +40,7 @@ contract ARX_Prescription {
     event OnDeployed(address indexed deployed);
 
     event maxRefillsReached();
+    event changedRefillsLeft(uint refills);
 
 
 	// Constructor function
@@ -50,7 +51,7 @@ contract ARX_Prescription {
         patient 		= 0;
         pharmacy 		= 0;
 		medication_id 	= 0;
-		refills_taken 	= 0;
+		refills_left 	= 3;
 		rxstate 		= CREATED;
 	}
 
@@ -84,22 +85,23 @@ contract ARX_Prescription {
 	function fillRx() {
 		if (msg.sender == pharmacy) {
 
-			if (refills_taken == MAX_REFILLS-1) {
-		    	refills_taken = MAX_REFILLS;
+			if (refills_left == 1) {
+		    	refills_left = 0;
 		    	rxstate = EXPIRED;
-        		maxRefillsReached();
+        		changedRefillsLeft(refills_left);
         	}
-        	else if (refills_taken < MAX_REFILLS) {
-        		refills_taken = refills_taken + 1;
+        	else if (refills_left > 0) {
+        		refills_left = refills_left - 1;
         		rxstate = FILLED;
+        		changedRefillsLeft(refills_left);
         	}
+        	else {}
 		}
 	}
 
 	function getPrescriptionState() returns(uint) {
 		return rxstate;
 	}
-
 
 
 // Medication 
@@ -115,18 +117,7 @@ contract ARX_Prescription {
 	}
 	
 	function getRefillsLeft() returns(uint) {
-		return MAX_REFILLS - refills_taken;
-	}
-	
-	function incRefillsTaken() {
-		if (refills_taken == MAX_REFILLS-1) {
-		    refills_taken = MAX_REFILLS;
-		    rxstate = EXPIRED;
-        	maxRefillsReached();
-        }
-        else if (refills_taken < MAX_REFILLS) {
-        	refills_taken = refills_taken + 1;
-        }
+		return refills_left;
 	}
 	
 
