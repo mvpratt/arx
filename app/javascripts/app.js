@@ -63,14 +63,19 @@ function refreshWindow() {
         state = "huh?";
     }*/
 
-    var balance_element = document.getElementById("balance");
-    balance_element.innerHTML = value.valueOf();
+    var rxstate_element = document.getElementById("rxstate");
+    rxstate_element.innerHTML = value.valueOf();
   }).catch(function(e) {
     console.log(e);
     setStatus("Error getting state; see log.");
   });
 };
 
+function resetRx(){
+  var arx = ARX_Prescription.deployed();
+
+  arx.reset({from: accounts[0]});
+}
 
 function init(){
   var arx = ARX_Prescription.deployed();

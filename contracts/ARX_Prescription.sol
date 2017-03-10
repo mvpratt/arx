@@ -14,8 +14,8 @@ contract Test {
 
 contract ARX_Prescription {
 
-	uint version_major = 0;
-	uint version_minor = 1;
+	uint constant version_major = 0;
+	uint constant version_minor = 1;
 
 	// Stakeholders
     address creator;
@@ -65,6 +65,18 @@ contract ARX_Prescription {
 		return;
 	}
 */
+
+// ---------- Debug only ------------------------------------------- //
+	function reset() {
+
+        patient 		= 0;
+        pharmacy 		= 0;
+		medication_id 	= 0;
+		refills_left 	= 3;
+		rxstate 		= CREATED;
+	}
+
+
 
 // Prescription state 
 
@@ -123,7 +135,7 @@ contract ARX_Prescription {
 // Medication 
 
 	function setMedicationID(uint num) {
-		if (msg.sender == doctor) {
+		if (msg.sender == doctor && rxstate == CREATED) {
 			medication_id = num;
 		}
 	}
@@ -141,7 +153,7 @@ contract ARX_Prescription {
 // Stakeholders
 
 	function setPatient(address addr) {
-		if (msg.sender == doctor) {
+		if (msg.sender == doctor && rxstate == CREATED) {
 			patient = addr;
 		}
 	}
@@ -151,7 +163,7 @@ contract ARX_Prescription {
 	}
 
 	function setDoctor(address addr) {
-		if (msg.sender == doctor) {
+		if (msg.sender == doctor && rxstate == CREATED) {
 			doctor = addr;
 		}
 	}
@@ -161,7 +173,7 @@ contract ARX_Prescription {
 	}
 
 	function setPharmacy(address addr) {
-		if (msg.sender == patient) {
+		if (msg.sender == patient && rxstate == SIGNED) {
 			pharmacy = addr;
 		}
 	}
