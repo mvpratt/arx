@@ -1,18 +1,22 @@
 var accounts;
 
 
+/*
 var arx = ARX_Prescription.deployed();
-var event = arx.changedRefillsLeft();
+var refill_event = arx.changedRefillsLeft();
 
 // watch for changes
-event.watch(function(error, result){
+refill_event.watch(function(error, result){
     // result will contain various information
     // including the argumets given to the Deposit
     // call.
-    if (!error)
-        console.log("refills left: " + result);
+    refreshRefills();
+    
+    if (!error){
+        console.log("refill event: " + result);
+    }
 });
-
+*/
 
 function setStatus(message) {
   var status = document.getElementById("status");
@@ -20,20 +24,7 @@ function setStatus(message) {
 };
 
 
-function refreshState() {
-  var meta = ARX_Prescription.deployed();
-
-  meta.getPrescriptionState.call({from: accounts[0]}).then(function(value) {
-    var balance_element = document.getElementById("balance");
-    balance_element.innerHTML = value.valueOf();
-  }).catch(function(e) {
-    console.log(e);
-    setStatus("Error getting state; see log.");
-  });
-};
-
-
-function refreshRefills() {
+function refreshWindow() {
   var arx = ARX_Prescription.deployed();
 
   arx.getRefillsLeft.call({from: accounts[0]}).then(function(value) {
@@ -43,22 +34,56 @@ function refreshRefills() {
     console.log(e);
     setStatus("Error getting state; see log.");
   });
+
+  arx.getPrescriptionState.call({from: accounts[0]}).then(function(value) {
+    /*var state = "test";
+    switch(value.valueOf()) {
+      case 0:
+        state = "Created";
+        break;
+      case 1:
+        state = "Signed";
+        break;
+      case 2:
+        state = "Submitted";
+        break;
+      case 3:
+        state = "Refill Requested";
+        break;
+      case 4:
+        state = "Filled";
+        break;
+      case 5:
+        state = "Expired";
+        break;
+      case 6:
+        state = "Error";
+        break;
+      default:
+        state = "huh?";
+    }*/
+
+    var balance_element = document.getElementById("balance");
+    balance_element.innerHTML = value.valueOf();
+  }).catch(function(e) {
+    console.log(e);
+    setStatus("Error getting state; see log.");
+  });
 };
 
 
 function init(){
-
   var arx = ARX_Prescription.deployed();
 
-  arx.setMedicationID(42, {from: accounts[0]});
-  arx.setPatient(accounts[1], {from: accounts[0]});
-  arx.signRx({from: accounts[0]});
-
-  arx.setPharmacy(accounts[2], {from: accounts[1]});
-  arx.submitRx({from: accounts[1]});
-
-  refreshState();
-  refreshRefills();
+  arx.setMedicationID(42, {from: accounts[0]}).then(function(){
+    arx.setPatient(accounts[1], {from: accounts[0]}).then(function(){
+      arx.signRx({from: accounts[0]}).then(function(){
+        arx.setPharmacy(accounts[2], {from: accounts[1]}).then(function(){
+          arx.submitRx({from: accounts[1]});
+        });
+      });
+    });
+  });
 }
 
 

@@ -2,7 +2,7 @@ pragma solidity ^0.4.2;
 
 import "ConvertLib.sol";
 
-
+/*
 contract Test {
 
 	uint num;
@@ -10,8 +10,12 @@ contract Test {
 		num = 1;
 	}
 }
+*/
 
 contract ARX_Prescription {
+
+	uint version_major = 0;
+	uint version_minor = 1;
 
 	// Stakeholders
     address creator;
@@ -37,9 +41,9 @@ contract ARX_Prescription {
 
 
     // Define events
-    event OnDeployed(address indexed deployed);
+    //event OnDeployed(address indexed deployed);
 
-    event maxRefillsReached();
+    //event maxRefillsReached();
     event changedRefillsLeft(uint refills);
 
 
@@ -54,36 +58,45 @@ contract ARX_Prescription {
 		refills_left 	= 3;
 		rxstate 		= CREATED;
 	}
-
+/*
 	function testDeploy() {
 		address deployed = new Test();
 		OnDeployed(deployed);
 		return;
 	}
-
+*/
 
 // Prescription state 
 
 	function signRx() {
-		if (msg.sender == doctor) {
+		if (msg.sender == doctor && rxstate == CREATED) {
 			rxstate = SIGNED;
+		}
+		else {
+			rxstate = ERROR;
 		}
 	}
 
 	function submitRx() {
-		if (msg.sender == patient) {
+		if (msg.sender == patient && rxstate == SIGNED) {
 			rxstate = SUBMITTED;
+		}
+		else {
+			rxstate = ERROR;
 		}
 	}
 
 	function reqRefillRx() {
-		if (msg.sender == patient) {
+		if (msg.sender == patient && refills_left != 0 && (rxstate == SUBMITTED || rxstate == FILLED)) {
 			rxstate = REFILL_REQUESTED;
+		}
+		else {
+			rxstate = ERROR;
 		}
 	}
 
 	function fillRx() {
-		if (msg.sender == pharmacy) {
+		if (msg.sender == pharmacy && rxstate == REFILL_REQUESTED) {
 
 			if (refills_left == 1) {
 		    	refills_left = 0;
@@ -96,6 +109,9 @@ contract ARX_Prescription {
         		changedRefillsLeft(refills_left);
         	}
         	else {}
+		}
+		else {
+			rxstate = ERROR;
 		}
 	}
 
