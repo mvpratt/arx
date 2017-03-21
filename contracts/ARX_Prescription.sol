@@ -66,7 +66,9 @@ contract ARX_Prescription {
 	}
 */
 
+
 // ---------- Debug only ------------------------------------------- //
+
 	function reset() {
 
         patient 		= 0;
