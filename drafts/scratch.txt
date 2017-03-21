@@ -1,0 +1,300 @@
+
+/* 
+
+Stories Completed:
+Doctor sets medication id, patient address, doctor address
+Doctor changes prescription state to signed
+Doctor sends Rx to patient
+
+Patient sets Pharamcy address
+Patient changes prescription state to submitted
+Patient sends Rx to Pharmacy
+
+Pharmacy changes state to filled
+Patient requests a refill, refill counter increments
+Prescription contract moves to expired automatically after 3rd refill
+Add basic front end - see prescription state and refills
+Once Rx is Expired, no other state change possible
+Add button to reset contract (debug only)
+
+
+TODO:
+Need to understand promises better.  And catch, and callbacks
+
+Add modifiers -- to restrict permission
+Refresh based on events
+Add button to deploy new contract
+Add error code -- why did this error happen -- maybe just do an event log
+Add doctor contract?
+Show state in human readable
+
+Restriction on whether patients can get multiple prescriptions for the same drug
+
+Add payments
+Add regulator view
+Add doctor licensing authority
+Doctor contract deploys a prescription contract
+
+Store patient data off chain (for privacy)
+Restrict access to prescriptions:
+     http://solidity.readthedocs.io/en/latest/common-patterns.html#restricting-access
+
+Add website static data (developer interface)
+
+Add website interaction - separate tabs for pharmacy, patient, doctor
+http://getbootstrap.com/
+http://getskeleton.com/
+
+Doxygen - standard documentation.
+Deploy on GETH local net
+
+from coury:   can share account
+frontendmasters.com
+
+
+Negative testing:
+Only doctor can change from CREATED to SIGNED
+Only patient can change from SIGNED to SUBMITTED
+Only pharmacy can change from SUBMITTED to FILLED
+Patient cant request more than 3 refills
+
+*/
+
+/* Other contracts / data structures
+
+	Doctor - user account
+		license 
+   		prescriptions signed
+
+	Prescription - smart contract 
+		doctor, 
+		patient, 
+		pharmacy, 
+		medication, 
+		refills taken
+
+	Patient - user account
+   		prescriptions owned
+
+   	Pharmacy - smart contract
+		inventory of medications, (internal array of strings)
+		active prescriptions (links to contract addresses)
+		Inventory is binary - if a medication is in the inventory 
+		list, it's always in stock.  If its not in the list, it's never in stock
+*/
+
+
+/* Web Interface
+
+Developer Mode
+	All data is readable
+	Can request transactions from any account
+
+
+Pharmacy View
+	My patients
+		Patient prescriptions
+
+Doctor View
+	My patients
+		Patient prescriptions
+
+Patient View
+	My prescriptions
+	My doctors
+	My pharmacies
+
+*/
+
+
+
+/*
+contract ARX_Doctor {
+
+	ARX_Prescription myPrescription;
+
+	function ARX_Doctor() {
+	}
+*/
+// Prescription functions
+// new prescription (deploy contract, add address to list)
+// sign prescription (prescription address)
+// send prescription (patient address)
+// list prescriptions ()
+
+/*
+	mapping(uint => ARX_Prescription) deployedContracts;
+	uint numContracts;
+
+	ARX_Prescription deployedContract;
+*/
+
+/*	function createPrescription() returns(address rx) {
+        // Create a new Token contract and return its address.
+        // From the JavaScript side, the return type is simply
+        // "address", as this is the closest type available in
+        // the ABI.
+        //deployedContracts[numContracts] = new ARX_Prescription();
+		//numContracts++;
+		//return deployedContracts[numContracts];
+		deployedContract = new ARX_Prescription();
+		return deployedContract;
+        //return new ARX_Prescription();
+	}
+
+*/
+
+/*
+	function setPrescriptionState(ARX_Prescription rxaddr, ARX_Prescription.PrescriptionState state) returns(bool) {
+		rxaddr.setPrescriptionState(state);
+        return true;
+	}
+	
+	function getPrescriptionState(ARX_Prescription rxaddr) returns(ARX_Prescription.PrescriptionState) {
+		return rxaddr.getPrescriptionState();
+	}
+*/
+    /**@dev Adds prescription to my list
+     * @param rxaddr Deployed prescription contract
+
+     *//*
+	function addPrescription(ARX_Prescription rxaddr) returns (bool){
+		myPrescription = rxaddr;
+	}
+
+	function getPrescription() returns (address){
+		return myPrescription;
+	}
+*/
+/*	function transferPrescription(ARX_Prescription rxaddr, ARX_Patient pxaddr) returns(bool) {
+		rxaddr.transfer(pxaddr);
+	}
+
+    function isTokenTransferOK(
+        address currentOwner,
+        address newOwner
+    ) returns (bool ok) {
+        // Check some arbitrary condition.
+        address tokenAddress = msg.sender;
+        return (keccak256(newOwner) & 0xff) == (bytes20(tokenAddress) & 0xff);
+    }
+*/
+/*}
+
+contract ARX_Patient {
+
+	//mapping(uint => ARX_Prescription) myPrescriptions;
+	//uint numPrescriptions;
+
+	ARX_Prescription myPrescription;
+
+	// Constructor function
+	function ARX_Patient() {
+	}
+
+	function addPrescription(ARX_Prescription rxaddr) returns (bool){
+		myPrescription = rxaddr;
+	}
+
+	function getPrescription() returns (address){
+		return myPrescription;
+	}*/
+/*
+	function transferPrescription(ARX_Prescription rxaddr, ARX_Patient pxaddr) returns(bool) {
+		rxaddr.transfer(pxaddr);
+	}
+*//*
+    function isTokenTransferOK(
+        address currentOwner,
+        address newOwner
+    ) returns (bool ok) {
+        // Check some arbitrary condition.
+        address tokenAddress = msg.sender;
+        return (keccak256(newOwner) & 0xff) == (bytes20(tokenAddress) & 0xff);
+    }
+
+}
+
+contract ARX_Pharmacy {
+
+    struct PharmacyInfo {
+		string business_name;
+		string business_address; 
+    }
+
+	PharmacyInfo public my_pharmacy; 
+
+
+// Inventory of medications  (Array of strings)
+	string [10] inventory;
+
+// List Prescriptions (Array of addresses)
+	address [10] prescriptions;
+	uint prescriptions_append_loc;
+
+
+// Constructor function
+	function ARX_Pharmacy() {
+
+		balances[tx.origin] = 10000;
+
+		my_pharmacy.business_name = "Zaphod's Pharmacy";
+		my_pharmacy.business_address = "4200 Infinity Dr";
+
+		// Initialize medication inventory
+		for (uint id = 1; id < 10; id++) {
+			inventory[id] = "test rx";
+        }
+	}
+
+
+// Inventory functions
+
+	function setMedicationName(uint id, string name) returns(bool) {
+		inventory[id] = name;
+        return true;
+	}
+	
+	function getMedicationName(uint id) returns(string) {
+		return inventory[id];
+	}
+		
+// Prescriptions
+
+	function addPrescriptionAddress(address rx) returns(bool) {
+		prescriptions[prescriptions_append_loc] = rx;
+		prescriptions_append_loc += 1;
+        return true;
+	}
+	
+	function getPrescriptionAddress(uint num) returns(address) {
+		return prescriptions[num];
+	}
+
+
+// Pharamcy Info
+
+	function setBusinessName(string name) returns(bool) {
+		my_pharmacy.business_name = name;
+        return true;
+	}
+	
+	function getBusinessName() returns(string) {
+		return my_pharmacy.business_name;
+	}
+
+	function setBusinessAddress(string addr) returns(bool) {
+		my_pharmacy.business_address = addr;
+        return true;
+	}
+	
+	function getBusinessAddress() returns(string) {
+		return my_pharmacy.business_address;
+	}
+
+
+
+}
+*/
+
+
